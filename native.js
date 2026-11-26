@@ -1,0 +1,4 @@
+const nativeGo=go;go=function(id){nativeGo(id);document.body.dataset.page=id;tabs.forEach((t,i)=>{let b=$('nav'+t[0]);b.querySelector('img').src='assets/'+(b.classList.contains('active')?'active-':'nav-')+i+'.png';b.setAttribute('aria-current',b.classList.contains('active')?'page':'false')})};go('home');
+const nativeRender=render;render=function(){nativeRender();$('greet').textContent=(state.name||'Sahabat Istiqamah')+' 👋';$('date').textContent='Semangat istiqamah hari ini! Sedikit demi sedikit, insyaAllah istiqamah.'};render();
+const tools=document.querySelectorAll('.readerTools button');tools.forEach((b,i)=>{b.addEventListener('click',()=>{tools.forEach(x=>x.classList.remove('selected'));b.classList.add('selected')});if(i===0)b.classList.add('selected')});
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
