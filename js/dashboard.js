@@ -9,6 +9,7 @@ const menus=[['home','Beranda'],['quran','Al-Qur’an'],['amalan','Amalan'],['ga
 onAuthStateChanged(auth,u=>{
  unsubscribe();ready=false;logs={};user=u;
  if(!u){location.replace('./index.html');return}
+ if(!u.emailVerified){location.replace('./verify-email.html');return}
  $('name').textContent=(u.displayName||'Sahabat Birri')+' 👋';$('email').textContent=u.email||'';$('initial').textContent=(u.displayName||'B')[0];
  $('photo').hidden=true;$('initial').hidden=false;
  if(u.photoURL){$('photo').onload=()=>{$('photo').hidden=false;$('initial').hidden=true};$('photo').src=u.photoURL}
