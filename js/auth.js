@@ -1,11 +1,16 @@
 import {auth} from './firebase-config.js';
 import {GoogleAuthProvider,signInWithPopup,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,updateProfile,sendEmailVerification,sendPasswordResetEmail,signOut,reload,getIdTokenResult} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 const $=id=>document.getElementById(id),page=document.body.dataset.page;
-let busy=false, initialized=false;
+let busy=false, initialized=false, navigating=false;
 const status=$('status');
-function say(t,error=false){status.textContent=t;status.classList.toggle('error',error)}
+function say(t,error=false){status.classList.remove('is-loading');status.textContent=t;status.classList.toggle('error',error)}
+function showLoader(){
+ status.classList.remove('error');status.classList.add('is-loading');
+ const label=document.createElement('span');label.className='birri-loader-label';label.textContent='Sedang memproses…';status.replaceChildren(label);
+}
+function hideLoader(){if(status.classList.contains('is-loading'))say('')}
 function controls(){document.querySelectorAll('button:not(.eye)').forEach(b=>b.disabled=busy||!initialized)}
-function go(path){location.replace('./'+path+'.html')}
+function go(path){location.replace('./'+path+'.html');navigating=true}
 async function route(u){
  if(!u){if(page==='verify-email')go('login');return}
  await reload(u);
@@ -19,7 +24,7 @@ async function route(u){
  else $('user-email').textContent=u.email||'';
 }
 const messages={'auth/invalid-email':'Alamat email tidak valid.','auth/invalid-credential':'Email atau kata sandi tidak sesuai.','auth/wrong-password':'Email atau kata sandi tidak sesuai.','auth/user-not-found':'Email atau kata sandi tidak sesuai.','auth/email-already-in-use':'Tidak dapat membuat akun dengan email tersebut. Coba masuk atau reset kata sandi.','auth/weak-password':'Kata sandi belum memenuhi ketentuan keamanan.','auth/password-does-not-meet-requirements':'Kata sandi belum memenuhi kebijakan keamanan Firebase.','auth/too-many-requests':'Terlalu banyak percobaan. Tunggu beberapa saat.','auth/network-request-failed':'Periksa koneksi internet.','auth/operation-not-allowed':'Metode masuk belum diaktifkan di Firebase.','auth/popup-blocked':'Izinkan pop-up di browser lalu coba lagi.','auth/popup-closed-by-user':'Jendela Google Login ditutup.','auth/unauthorized-domain':'Domain ini belum diizinkan di Firebase.','auth/account-exists-with-different-credential':'Gunakan metode masuk yang sebelumnya dipakai untuk akun ini.','auth/user-disabled':'Akun tidak dapat digunakan. Hubungi pengelola.'};
-async function run(fn){if(busy||!initialized)return;busy=true;controls();say('Sedang memproses…');try{await fn()}catch(e){console.error(e.code||e.name);say(messages[e.code]||'Proses gagal. Silakan coba lagi.',true)}finally{busy=false;controls()}}
+async function run(fn){if(busy||!initialized)return;busy=true;controls();showLoader();try{await fn()}catch(e){console.error(e.code||e.name);say(messages[e.code]||'Proses gagal. Silakan coba lagi.',true)}finally{if(!navigating){hideLoader();busy=false;controls()}}}
 controls();onAuthStateChanged(auth,u=>{initialized=true;controls();if(!busy&&u)run(()=>route(u));else if(!busy&&page==='verify-email')go('login')},()=>{say('Sesi tidak dapat diperiksa. Muat ulang halaman.',true)});
 document.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=()=>{const f=$(b.dataset.toggle),show=f.type==='password';f.type=show?'text':'password';b.textContent=show?'Sembunyikan':'Lihat';b.setAttribute('aria-label',show?'Sembunyikan kata sandi':'Tampilkan kata sandi')});
 const provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
