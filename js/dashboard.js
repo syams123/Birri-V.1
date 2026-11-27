@@ -12,7 +12,7 @@ onAuthStateChanged(auth,async u=>{
  const generation=++authGeneration;
  unsubscribe();unsubscribe=()=>{};ready=false;logs={};user=null;
  if(!u){location.replace('./index.html');return}
- $('status').textContent='Memeriksa sesi dan verifikasi email…';
+ $('status').textContent='';
  $('task-list').replaceChildren();
  try {
    await reload(u);
@@ -31,9 +31,9 @@ onAuthStateChanged(auth,async u=>{
  $('name').textContent=(u.displayName||'Sahabat Birri')+' 👋';$('email').textContent=u.email||'';$('initial').textContent=(u.displayName||'B')[0];
  $('photo').hidden=true;$('initial').hidden=false;
  if(u.photoURL){$('photo').onload=()=>{$('photo').hidden=false;$('initial').hidden=true};$('photo').src=u.photoURL}
- $('status').textContent='Memuat progres…';render();
+ $('status').textContent='';render();
  saveProfile(u).catch(e=>{console.error('Profil:',e);});
- unsubscribe=watchLogs(u.uid,(data,meta)=>{if(generation!==authGeneration||user?.uid!==u.uid)return;logs=data;ready=!meta.fromCache||ready;$('status').textContent=meta.hasPendingWrites?'Menunggu sinkronisasi…':meta.fromCache?'Data cache • menunggu koneksi':'Progres tersinkron';render();},e=>{if(generation!==authGeneration)return;ready=false;console.error(e);$('status').textContent='Gagal memuat progres: '+(e.code||'error');render()});
+ unsubscribe=watchLogs(u.uid,(data,meta)=>{if(generation!==authGeneration||user?.uid!==u.uid)return;logs=data;ready=!meta.fromCache||ready;$('status').textContent='';render();},e=>{if(generation!==authGeneration)return;ready=false;console.error(e);$('status').textContent='Gagal memuat progres: '+(e.code||'error');render()});
 },e=>{$('status').textContent='Sesi login gagal diperiksa.';console.error(e)});
 $('logout').onclick=()=>signOut(auth).catch(()=>alert('Gagal keluar. Coba lagi.'));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&user)render()});setInterval(()=>{if(user&&dateKey(new Date())!==day)render()},30000);
